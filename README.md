@@ -16,7 +16,7 @@ I opted for a different approach (that quite honestly felt more intuitive and mo
 
 8x8 Kernel Depthwise Convolutional layer (reduce each channel down to a single value) -> Fully Connected Layer of 128 Nodes -> Fully Connected Layer with 1 Node. 
 
-The idea is to produce a single value for each pattern (channel) that represents the current opportunities and hazards of the board.
+The idea is to produce a single value for each pattern (channel) that represents the current opportunities and hazards of that specific point of view.
 
 ## Positional Attention
 I used a weighted 8x8 matrix as an additional channel concatenated to each input. In theory, this should represent positional attention. Positional attentions gives focuses the model on important squares of the board irrelevant of the current state and spatial context. For example, the middle squares are far more important than edge squares. Over the course of training, the model learns a representation of the most vital squares to control, attack, and defend.
