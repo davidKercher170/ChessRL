@@ -269,3 +269,47 @@ class ResidualBlock(tf.keras.layers.Layer):
         x = tf.keras.layers.Add()([x, shortcut])
         x = self.relu(x)
         return x
+
+def create_q_policy_model():
+    inputs = layers.Input(shape=(8, 8, 18), dtype='float32', name="BitboardInput")
+
+    x = PositionalBiasLayer()(inputs)
+    x = ResidualBlock(filters=128, use_attention=True)(x)
+
+    for _ in range(3):
+      x = ResidualBlock(filters=128, use_attention=True)(x)
+
+    for _ in range(2):
+        x = ResidualBlock(filters=128, use_attention=True)(x)
+
+    for _ in range(2):
+        x = ResidualBlock(filters=128, use_attention=True)(x)
+
+    x = ResidualBlock(filters=256, use_attention=True)(x)
+
+    # Q-head: outputs Q(s, a) for all 1792 actions
+    q_x = layers.Conv2D(filters=32, kernel_size=1, activation="swish")(x)
+    q_x = SpatialAttentionBlock()(q_x)
+    q_x = ECABlock()(q_x)
+    q_x = layers.BatchNormalization()(q_x)
+    q_x = layers.Flatten()(q_x)
+    q_x = layers.LeakyReLU(alpha=0.01)(q_x)
+    q = layers.Dense(1792, activation='linear', name="QHead")(q_x)
+
+    v_x = layers.DepthwiseConv2D(kernel_size=8, activation="swish")(x)
+    v_x = layers.BatchNormalization()(v_x)
+    v_x = layers.Flatten()(v_x)
+    v_x = layers.Dense(128, activation='relu')(v_x)
+    v = layers.Dense(1, activation='tanh', name="ValueHead")(v_x)
+
+    # Policy head: outputs π(a|s) logits for all 1792 actions
+    pi_x = layers.Conv2D(filters=32, kernel_size=1, activation="swish")(x)
+    pi_x = SpatialAttentionBlock()(pi_x)
+    pi_x = ECABlock()(pi_x)
+    pi_x = layers.BatchNormalization()(pi_x)
+    pi_x = layers.Flatten()(pi_x)
+    pi_x = layers.LeakyReLU(alpha=0.01)(pi_x)
+    pi = layers.Dense(1792, activation='linear', name="PolicyHead")(pi_x)
+
+    model = tf.keras.Model(inputs=inputs, outputs=[q, v, pi])
+    return model
