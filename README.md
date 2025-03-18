@@ -21,5 +21,5 @@ The idea is to produce a single value for each pattern (channel) that represents
 ## Positional Attention
 I used a weighted 8x8 matrix as an additional channel concatenated to each input. In theory, this should represent positional attention. Positional attentions gives focuses the model on important squares of the board irrelevant of the current state and spatial context. For example, the middle squares are far more important than edge squares. Over the course of training, the model learns a representation of the most vital squares to control, attack, and defend.
 
-## Partial Convolutional Padding
+## Partial Convolutional Based Padding
 The board representation for a chess state is relatively small (in height and width) vs. the typical use of residual convolutional blocks in object detection and image analysis. As such, every square of the board holds vital context on the current state of the game. I opted for partial convolutional padding over zero padding as it maximizes boundary context. More information on Partial Convolutional Padding can be found in the publication (https://arxiv.org/abs/1811.11718).
