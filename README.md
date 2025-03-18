@@ -14,4 +14,12 @@ convolutional reduction layer down to a 1-16 filters -> fully connected layer of
 
 I opted for a different approach (that quite honestly felt more intuitive and more interesting). My approach is: 
 
-8x8 Kernel Depthwise Convolutional layer (reduce each channel down to a single value) -> Fully Connected Layer of 128 Nodes -> Fully Connected Layer with 1 Node. The idea is to produce a single value for each pattern (channel) that represents the current opportunities and hazards of the board.
+8x8 Kernel Depthwise Convolutional layer (reduce each channel down to a single value) -> Fully Connected Layer of 128 Nodes -> Fully Connected Layer with 1 Node. 
+
+The idea is to produce a single value for each pattern (channel) that represents the current opportunities and hazards of the board.
+
+## Positional Attention
+I used a weighted 8x8 matrix as an additional channel concatenated to each input. In theory, this should represent positional attention. Positional attentions gives focuses the model on important squares of the board irrelevant of the current state and spatial context. For example, the middle squares are far more important than edge squares. Over the course of training, the model learns a representation of the most vital squares to control, attack, and defend.
+
+## Partial Convolutional Padding
+The board representation for a chess state is relatively small (in height and width) vs. the typical use of residual convolutional blocks in object detection and image analysis. As such, every square of the board holds vital context on the current state of the game. I opted for partial convolutional padding over zero padding as it maximizes boundary context. More information on Partial Convolutional Padding can be found in the publication (https://arxiv.org/abs/1811.11718).
