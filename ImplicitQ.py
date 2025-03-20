@@ -32,12 +32,11 @@ def train_step(batch):
         L_pi = -tf.reduce_mean(w * log_pi_a)
 
         # Conservative Q-Learning penalty
-        # logsumexp_q = tf.reduce_logsumexp(q, axis=1)
-        # L_CQL = tf.reduce_mean(logsumexp_q - q_a)
+        logsumexp_q = tf.reduce_logsumexp(q, axis=1)
+        L_CQL = tf.reduce_mean(logsumexp_q - q_a)
 
         # Total loss
-        # loss = L_Q + L_V + L_pi + 0.05 * L_CQL
-        loss = L_Q + L_V + L_pi
+        loss = L_Q + L_V + L_pi + 0.05 * L_CQL
 
     # Compute and apply gradients
     grads = tape.gradient(loss, model.trainable_variables)
