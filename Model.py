@@ -162,51 +162,24 @@ class SpatialAttentionBlock(tf.keras.layers.Layer):
         # Scale with gate and apply to input
         return self.multiply([inputs, self.gate * spatial_attn])
 
-class SpatialAttentionBlock1(tf.keras.layers.Layer):
+class PositionalBiasLayer(tf.keras.layers.Layer):
     def __init__(self, **kwargs):
-        super(SpatialAttentionBlock, self).__init__(**kwargs)
+        super(PositionalBiasLayer, self).__init__(**kwargs)
 
     def build(self, input_shape):
-        # Define depthwise convolution layers
-        self.row_conv = tf.keras.layers.Conv2D(
-            filters=1,
-            kernel_size=(1, 8),
-            padding='same',
-            use_bias=False
-        )
-        self.col_conv = tf.keras.layers.Conv2D(
-            filters=1,
-            kernel_size=(8, 1),
-            padding='same',
-            use_bias=False
-        )
-
-        self.concat = tf.keras.layers.Concatenate(axis=-1)
-        self.fusion_conv = tf.keras.layers.Conv2D(1, kernel_size=1, activation='sigmoid', use_bias=False)
-
-        # Define trainable variables with constraints
-        self.gate = self.add_weight(
-            name='gate',
-            shape=(1,),
-            initializer=tf.constant_initializer(0.3),
+        self.pos_bias = self.add_weight(
+            shape=(1, 8, 8, 1),
+            initializer='zeros',
             trainable=True,
-            constraint=ClipConstraint(0.0, 2.0)
+            name='pos_bias',
+            constraint=ClipConstraint(0.0, 1.0)
         )
-
-        # Define combination layers
-        self.multiply = tf.keras.layers.Multiply()
 
     def call(self, inputs):
-        # Apply depthwise convolutions for attention
-        row_attn = self.row_conv(inputs)  # Row relationships
-        col_attn = self.col_conv(inputs)  # Column relationships
-        max_pool = tf.reduce_max(inputs, axis=-1, keepdims=True)
-
-        # spatial_attn = self.final_conv(spatial_attn)
-        spatial_attn = self.concat([row_attn, col_attn, max_pool])
-        spatial_attn = self.fusion_conv(spatial_attn)
-        return self.multiply([inputs, self.gate * spatial_attn])
-
+      batch_size = tf.shape(inputs)[0]
+      pos_bias_expanded = tf.tile(self.pos_bias, [batch_size, 1, 1, 1])  # (batch_size, 8, 8, 1)
+      return layers.Concatenate(axis=-1)([inputs, pos_bias_expanded])
+        
 class ResidualBlock(tf.keras.layers.Layer):
     """
     A Keras Layer implementing a Residual Block with optional projection and SE.
@@ -274,18 +247,9 @@ def create_q_policy_model():
     inputs = layers.Input(shape=(8, 8, 18), dtype='float32', name="BitboardInput")
 
     x = PositionalBiasLayer()(inputs)
-    x = ResidualBlock(filters=128, use_attention=True)(x)
 
-    for _ in range(3):
+    for _ in range(8):
       x = ResidualBlock(filters=128, use_attention=True)(x)
-
-    for _ in range(2):
-        x = ResidualBlock(filters=128, use_attention=True)(x)
-
-    for _ in range(2):
-        x = ResidualBlock(filters=128, use_attention=True)(x)
-
-    x = ResidualBlock(filters=256, use_attention=True)(x)
 
     # Q-head: outputs Q(s, a) for all 1792 actions
     q_x = layers.Conv2D(filters=32, kernel_size=1, activation="swish")(x)
