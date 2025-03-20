@@ -10,7 +10,7 @@ As with all decisions made with the model, I wanted an intuitive spatial attenti
 ### Value Head
 The LeelaZero and AlphaZero model value heads consist of:
 
-3x3 Kernel Convolutional reduction layer down to a 1-16 filters --> Fully Connected layer of 128 nodes --> Fully Connected layer with 1 node --> Tanh activation (scale between -1 and 1) 
+3x3 Kernel Convolutional reduction layer down to a 1-16 filters $\longrightarrow$ Fully Connected layer of 128 nodes --> Fully Connected layer with 1 node --> Tanh activation (scale between -1 and 1) 
 
 I opted for a different approach (that quite honestly felt more intuitive and more interesting). The idea is to produce a single value for each pattern (channel) that represents the current opportunities and hazards of that specific point of view. My approach is: 
 
