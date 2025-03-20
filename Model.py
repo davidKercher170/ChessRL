@@ -52,7 +52,7 @@ class ClipConstraint(tf.keras.constraints.Constraint):
 class ECABlock(tf.keras.layers.Layer):
     def __init__(self, k_size=3, **kwargs):
         super(ECABlock, self).__init__(**kwargs)
-        self.k_size = k_size  # Kernel size for 1D conv
+        self.k_size = k_size
 
     def build(self, input_shape):
         self.filters = input_shape[-1]
@@ -65,13 +65,11 @@ class ECABlock(tf.keras.layers.Layer):
             constraint=ClipConstraint(0.0, 2.0)
         )
 
-        # Define layers
         self.global_avg_pool = tf.keras.layers.GlobalAveragePooling2D()
         self.global_max_pool = tf.keras.layers.GlobalMaxPooling2D()
 
         self.reshape = tf.keras.layers.Reshape((self.filters, 1))
 
-        # Separate 1D convolutions for avg and max pooled features
         self.conv_avg = tf.keras.layers.Conv1D(
             filters=1, kernel_size=self.k_size, padding="same",
             use_bias=False, activation='sigmoid'
@@ -86,24 +84,18 @@ class ECABlock(tf.keras.layers.Layer):
 
     def call(self, inputs):
         # Global pooling
-        gap_avg = self.global_avg_pool(inputs)  # (batch_size, filters)
-        gap_max = self.global_max_pool(inputs)  # (batch_size, filters)
+        gap_avg = self.global_avg_pool(inputs)
+        gap_max = self.global_max_pool(inputs)
 
-        # Reshape to (batch_size, filters, 1) for 1D conv
         gap_avg = self.reshape(gap_avg)
         gap_max = self.reshape(gap_max)
 
-        # Apply separate 1D convolutions
         attn_avg = self.conv_avg(gap_avg)
         attn_max = self.conv_max(gap_max)
 
-        # Merge attention weights (sum or max, sum is preferred)
-        attention = attn_avg + attn_max  # Element-wise sum (batch_size, filters, 1)
-
-        # Reshape back to (batch_size, 1, 1, filters)
+        attention = attn_avg + attn_max
         attention = self.reshape_attention(attention)
 
-        # Apply gate and multiply with input
         return self.multiply([inputs, self.gate * attention])
 
 class SpatialAttentionBlock(tf.keras.layers.Layer):
@@ -111,7 +103,7 @@ class SpatialAttentionBlock(tf.keras.layers.Layer):
         super(SpatialAttentionBlock, self).__init__(**kwargs)
 
     def build(self, input_shape):
-        # Row convolution to pool each row into a single value
+
         self.row_conv = tf.keras.layers.Conv2D(
             filters=1,
             kernel_size=(1, 8),
@@ -120,7 +112,6 @@ class SpatialAttentionBlock(tf.keras.layers.Layer):
             use_bias=False
         )
 
-        # Column convolution to pool each column into a single value
         self.col_conv = tf.keras.layers.Conv2D(
             filters=1,
             kernel_size=(8, 1),
@@ -128,7 +119,7 @@ class SpatialAttentionBlock(tf.keras.layers.Layer):
             padding='valid',
             use_bias=False
         )
-        # Learnable gate parameter
+
         self.gate = self.add_weight(
             name='gate',
             shape=(1,),
@@ -137,29 +128,25 @@ class SpatialAttentionBlock(tf.keras.layers.Layer):
             constraint=ClipConstraint(0.0, 2.0)
         )
 
-        # New 3x3 convolution to mix features after adding row and col attentions
         self.fusion_conv = tf.keras.layers.Conv2D(
             filters=1,
             kernel_size=(3, 3),
             padding='same',
-            use_bias=False  # Optional: align with previous layers, or set True if desired
+            use_bias=False
         )
 
         # Multiplication layer
         self.multiply = tf.keras.layers.Multiply()
 
     def call(self, inputs):
-        # Compute row attention: (batch_size, 8, 1, 1)
+
         row_attn = self.row_conv(inputs)
-        # Compute column attention: (batch_size, 1, 8, 1)
         col_attn = self.col_conv(inputs)
-        # Add with broadcasting: (batch_size, 8, 8, 1)
+
         spatial_attn = row_attn + col_attn
         spatial_attn = self.fusion_conv(spatial_attn)
 
-        # Apply sigmoid to get attention weights
         spatial_attn = tf.sigmoid(spatial_attn)
-        # Scale with gate and apply to input
         return self.multiply([inputs, self.gate * spatial_attn])
 
 class PositionalBiasLayer(tf.keras.layers.Layer):
@@ -181,9 +168,6 @@ class PositionalBiasLayer(tf.keras.layers.Layer):
       return layers.Concatenate(axis=-1)([inputs, pos_bias_expanded])
         
 class ResidualBlock(tf.keras.layers.Layer):
-    """
-    A Keras Layer implementing a Residual Block with optional projection and SE.
-    """
     def __init__(self,
                  filters,
                  kernel_size=3,
@@ -197,7 +181,6 @@ class ResidualBlock(tf.keras.layers.Layer):
         self.padding_size = kernel_size // 2
         self.groups = groups
 
-        # Define the layers for the 'shortcut' (projection) if needed
         self.shortcut_conv = tf.keras.layers.Conv2D(
             filters,
             kernel_size=1,
@@ -215,30 +198,24 @@ class ResidualBlock(tf.keras.layers.Layer):
           self.eca_block = ECABlock()
           self.spatial_attention_block = SpatialAttentionBlock()
 
-        # Activation
         self.relu = tf.keras.layers.ReLU()
 
     def call(self, input_tensor):
-
-
+        
         shortcut = self.shortcut_conv(input_tensor)
         shortcut = self.shortcut_bn(shortcut)
 
-        # Residual path: conv1 -> bn1 -> relu
         x = self.conv1(input_tensor)
         x = self.bn1(x)
         x = self.relu(x)
 
-        # conv2 -> bn2
         x = self.conv2(x)
         x = self.bn2(x)
 
-        # Optionally apply SE
         if self.use_attention:
           x = self.eca_block(x)
           x = self.spatial_attention_block(x)
 
-        # Merge shortcut and residual
         x = tf.keras.layers.Add()([x, shortcut])
         x = self.relu(x)
         return x
@@ -251,7 +228,6 @@ def create_q_policy_model():
     for _ in range(8):
       x = ResidualBlock(filters=128, use_attention=True)(x)
 
-    # Q-head: outputs Q(s, a) for all 1792 actions
     q_x = layers.Conv2D(filters=32, kernel_size=1, activation="swish")(x)
     q_x = SpatialAttentionBlock()(q_x)
     q_x = ECABlock()(q_x)
@@ -266,7 +242,6 @@ def create_q_policy_model():
     v_x = layers.Dense(128, activation='relu')(v_x)
     v = layers.Dense(1, activation='tanh', name="ValueHead")(v_x)
 
-    # Policy head: outputs π(a|s) logits for all 1792 actions
     pi_x = layers.Conv2D(filters=32, kernel_size=1, activation="swish")(x)
     pi_x = SpatialAttentionBlock()(pi_x)
     pi_x = ECABlock()(pi_x)
