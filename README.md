@@ -24,3 +24,6 @@ I used a weighted 8x8 matrix as an additional channel concatenated to each input
 
 ### Partial Convolutional Based Padding
 The board representation for a chess state is relatively small (in height and width) vs. the typical use of residual convolutional blocks in object detection and image analysis. As such, every square of the board holds vital context on the current state of the game. I opted for partial convolutional padding over zero padding as it maximizes boundary context. While typical zero padding will compute non-zero values for boundary positions, it will normalize by the full size of the kernel. Partial convolutional padding will only normalize by the number of non-zero weights considered. In effect, zero-padding diminishes the value of boundary values in comparison to non-boundary values. More information on Partial Convolutional Padding can be found in the publication (https://arxiv.org/abs/1811.11718).
+
+# Transfer Learning
+Transfer learning is the process of applying the knowledge in a pretrained model to a new dataset/problem. In the case of chess, I will train a base model through IQL on a large database and then flesh out learning done through self-play with a Monte Carlo Tree Search. Once the model is performing sufficiently well, I then use this base model to create submodels thats mimic different styles.
