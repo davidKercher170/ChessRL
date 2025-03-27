@@ -1,7 +1,7 @@
 # ChessRL
 Chess model created using Deep Reinforcement Learning. Details the use of novel attention mechanisms and a new paradigm for transfer learning. I follow the protypical structure layed out in the LeelaZero and AlphaZero (https://arxiv.org/abs/1712.01815) models with a stack of residual convolutional blocks, each with a 3x3 kernel and 128 filters.
 
-[Heading 1](### Board Representation)
+[Heading 1](###board-representation)
 I use an 8x8x18 representation of the current board state as input to the model. The height and width represent the chess board spatial dimensions, while the 18 channels represent characteristics of the board. Channels 1-6 contain information for each piece type (Pawn, Knight, Bishop, etc...) for white and Channels 7-12 hold information for each piece type for black. Channels 13-17 contain information for king side and queen side castling rights for each player. Channel 18 is set to 1 if the board has been flipped and otherwise is set to 0 (for training, the spatial information for all states are represented from the white perspective). As defined this is a typical approach to chess reinforcement learning. More advanced models will contain temporal conext with previous states channel.
 
 [Heading 2](### Channel Attention)
