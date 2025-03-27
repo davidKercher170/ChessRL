@@ -13,7 +13,7 @@ As with all decisions made with the model, I wanted an intuitive spatial attenti
 ### Value Head
 The LeelaZero and AlphaZero model value heads consist of:
 
-$3x3$ Kernel Convolutional reduces to $1-16$ filters $\longrightarrow$ Fully Connected layer, $128$ nodes $\longrightarrow$ Fully Connected layer, 1 node $\longrightarrow$ Tanh Activation (scale to $x \in (-1,1)$).
+$3x3$ Kernel Convolutional reduces to $1-16$ filters $\longrightarrow$ Fully Connected layer, $128$ nodes $\longrightarrow$ Fully Connected layer, 1 node $\longrightarrow$ Tanh Activation (scale to $x \in -1,1 $ ).
 
 I opted for a different approach. The idea is to produce a single value for each channel (pattern) that represents a win/loss contribution. My approach is: 
 
