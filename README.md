@@ -13,14 +13,14 @@ As with all decisions made with the model, I wanted an intuitive spatial attenti
 ### Value Head
 The LeelaZero and AlphaZero model value heads consist of:
 
-$3x3$ Kernel Convolutional reduces to $1-16$ filters $\longrightarrow$ Fully Connected layer, $128$ nodes $\longrightarrow$ Fully Connected layer, 1 node $\longrightarrow$ Tanh Activation (scale to $x \in$ [-1,1] ).
+$3x3$ Kernel Convolutional reduces to $1-16$ filters $\longrightarrow$ Fully Connected layer, $128$ nodes $\longrightarrow$ Fully Connected layer, 1 node $\longrightarrow$ Tanh Activation (scale to $x \in$ (-1,1) ).
 
 I opted for a different approach. The idea is to produce a single value for each channel (pattern) that represents a win/loss contribution. My approach is: 
 
 $8x8$ Kernel Depthwise Convolutional (reduce each channel down to a single value) $\longrightarrow$ Fully Connected Layer of $128$ Nodes $\longrightarrow$ Fully Connected Layer, $1$ Node, Tanh Activation. 
 
 ### Positional Attention
-I used a weighted 8x8 matrix as an additional channel concatenated to each input. In theory, this should represent positional attention. Positional attentions gives focuses the model on important squares of the board irrelevant of the current state and spatial context. For example, the middle squares are far more important than edge squares. Over the course of training, the model learns a representation of the most vital squares to control, attack, and defend.
+I used a weighted $8x8$ matrix as an additional channel concatenated to each input. In theory, this should represent positional attention. Positional attentions gives focuses the model on important squares of the board irrelevant of the current state and spatial context. For example, the middle squares are far more important than edge squares. Over the course of training, the model learns a representation of the most vital squares to control, attack, and defend.
 
 ### Partial Convolutional Based Padding
 The board representation for a chess state is relatively small (in height and width) vs. the typical use of residual convolutional blocks in object detection and image analysis. As such, every square of the board holds vital context on the current state of the game. I opted for partial convolutional padding over zero padding as it maximizes boundary context. While typical zero padding will compute non-zero values for boundary positions, it will normalize by the full size of the kernel. Partial convolutional padding will only normalize by the number of non-zero weights considered. In effect, zero-padding diminishes the value of boundary values in comparison to non-boundary values. More information on Partial Convolutional Padding can be found in the publication (https://arxiv.org/abs/1811.11718).
