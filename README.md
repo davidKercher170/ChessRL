@@ -68,6 +68,8 @@ Transfer learning is the process of applying the knowledge in a pretrained model
 
 In the application of reinforcement learning, I propose freezing all convolutional layers and training only attention mechanisms. Intuitively, the idea is that two players of similar playing strength will see similar patterns, tactics, and strategies. The difference is which patterns and strategies the player prefers or finds most important. Convolutional layers from generalized training will detect patterns across spatial and channel mechanisms, while attention mechanisms determine which patterns (channel) and positions (spatial) are most important. To further this idea, I added the positional attention weights which represent positional preferences irrelevant of spatial and channel context. In total, each stylistic submodel will use the same convolutional networks and see the same information across the spatial and channel dimension. However, each submodel will weigh spatial, channel, and positional info differently, changing how the submodel weighs information.
 
+--
+
 ## Additional Information
 This repository contains implementations, experiments, and visualizations related to various autoencoder models. Contributions, feedback, and discussions are highly welcome. Feel free to explore the code, open issues, or reach out if you have questions. 😊
 
