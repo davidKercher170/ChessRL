@@ -42,13 +42,9 @@ I used a weighted $8x8$ matrix as an additional channel concatenated to each inp
 ---
 
 ### Policy Head
-The LeelaZero and AlphaZero model value heads consist of:
 
-$3x3$ Kernel Convolutional reduces to $1-16$ filters $\longrightarrow$ Fully Connected layer, $128$ nodes $\longrightarrow$ Fully Connected layer, 1 node $\longrightarrow$ Tanh Activation (scale to $x \in$ (-1,1) ).
-
-I opted for a different approach. The idea is to produce a single value for each channel (pattern) that represents a win/loss contribution. My approach is: 
-
-$8x8$ Kernel Depthwise Convolutional (reduce each channel down to a single value) $\longrightarrow$ Fully Connected Layer of $128$ Nodes $\longrightarrow$ Fully Connected Layer, $1$ Node, Tanh Activation. 
+I opted for a conventional approach with the policy head:
+$3x3$ Kernel Convolutional reduces to #32$ filters $\longrightarrow$ Fully Connected layer, $1792$ nodes (1 Node of each Action) with Linear Activation.
 
 ---
 
