@@ -1,5 +1,5 @@
 # ChessRL
-Chess model created using Deep Reinforcement Learning. Details the use of novel attention mechanisms and a new paradigm for transfer learning. I follow the protypical structure layed out in the LeelaZero and AlphaZero (https://arxiv.org/abs/1712.01815) models with a stack of residual convolutional blocks, each with a $3x3$ kernel and $128$ filters.
+Chess model created using Deep Reinforcement Learning. Details the use of novel attention mechanisms and a new paradigm for transfer learning. I follow the protypical structure layed out in the LeelaZero and AlphaZero (https://arxiv.org/abs/1712.01815) models with a stack of residual convolutional blocks, each with a $3x3$ kernel and $128$ filters. The innovation in my model is the use of positional attention, a novel value head architecture, and my approach to transfer learning purely through attention. 🚀
 
 ## Table of Contents
 - [Board Representation](board-representation)
