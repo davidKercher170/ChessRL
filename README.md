@@ -39,9 +39,7 @@ As with all decisions made with the model, I wanted an intuitive spatial attenti
 ### Positional Attention
 I used a weighted $8x8$ matrix as an additional channel concatenated to each input. In theory, this should represent positional attention. Positional attentions gives focuses the model on important squares of the board irrelevant of the current state and spatial context. For example, the middle squares are far more important than edge squares. Over the course of training, the model learns a representation of the most vital squares to control, attack, and defend.
 
-![PosAttention](https://github.com/user-attachments/assets/02d5992a-3ff3-4118-98ad-c35ec32f2aae)
-
-
+![Positional](https://github.com/user-attachments/assets/4dd8954c-898b-4d5d-92c0-bcb23540e7ca)
 
 ---
 
