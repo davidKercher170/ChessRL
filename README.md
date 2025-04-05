@@ -46,7 +46,7 @@ I used a weighted $8x8$ matrix as an additional channel concatenated to each inp
 ### Policy Head
 
 I opted for a conventional approach with the policy head:
-$3x3$ Kernel Convolutional reduces to #32$ filters $\longrightarrow$ Fully Connected layer, $1792$ nodes (1 Node of each Action) with Linear Activation.
+$3x3$ Kernel Convolutional reduces to $32$ filters $\longrightarrow$ Fully Connected layer, $1792$ nodes (1 Node of each Action) with Linear Activation.
 
 ---
 
